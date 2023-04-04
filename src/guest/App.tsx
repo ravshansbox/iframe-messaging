@@ -2,18 +2,12 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { InputMessage } from '../InputMessage';
 
 export const App: ComponentType = () => {
-  const [port, setPort] = useState<MessagePort | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
-      const [port] = event.ports;
-      if (port) {
-        port.addEventListener('message', (event) => {
-          setLastMessage(`Host: ${event.data}`);
-        });
-        port.start();
-        setPort(port);
+      if (typeof event.data === 'string') {
+        setLastMessage(`Host: ${event.data}`);
       }
     };
     window.addEventListener('message', onMessage);
@@ -26,9 +20,8 @@ export const App: ComponentType = () => {
     <>
       <div>Guest</div>
       <InputMessage
-        disabled={port === null}
         onChange={(text) => {
-          port?.postMessage(text);
+          window.parent.postMessage(text, '*');
         }}
       />
       <div>{lastMessage}</div>

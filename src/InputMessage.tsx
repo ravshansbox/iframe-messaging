@@ -1,14 +1,10 @@
 import { useRef, type ComponentType } from 'react';
 
 type InputMessageProps = {
-  disabled: boolean;
   onChange: (text: string) => void;
 };
 
-export const InputMessage: ComponentType<InputMessageProps> = ({
-  disabled,
-  onChange,
-}) => {
+export const InputMessage: ComponentType<InputMessageProps> = ({ onChange }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -22,16 +18,8 @@ export const InputMessage: ComponentType<InputMessageProps> = ({
         inputRef.current.value = '';
       }}
     >
-      <input
-        ref={inputRef}
-        type="text"
-        name="message"
-        autoComplete="off"
-        disabled={disabled}
-      />
-      <button type="submit" disabled={disabled}>
-        Send
-      </button>
+      <input ref={inputRef} type="text" name="message" autoComplete="off" />
+      <button type="submit">Send</button>
     </form>
   );
 };

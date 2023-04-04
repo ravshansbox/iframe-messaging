@@ -1,32 +1,32 @@
-import { useState, type ComponentType } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { InputMessage } from '../InputMessage';
 
 export const App: ComponentType = () => {
-  const [port, setPort] = useState<MessagePort | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (typeof event.data === 'string') {
+        setLastMessage(`Guest: ${event.data}`);
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => {
+      window.removeEventListener('message', onMessage);
+    };
+  }, []);
 
   return (
     <>
       <div>Host</div>
       <InputMessage
-        disabled={port === null}
         onChange={(text) => {
-          port?.postMessage(text);
+          iframeRef.current?.contentWindow?.postMessage(text, '*');
         }}
       />
       <div>{lastMessage}</div>
-      <iframe
-        src="http://localhost:3002"
-        onLoad={(event) => {
-          const { port1, port2 } = new MessageChannel();
-          port1.addEventListener('message', (event) => {
-            setLastMessage(`Guest: ${event.data}`);
-          });
-          port1.start();
-          setPort(port1);
-          event.currentTarget.contentWindow?.postMessage('init', '*', [port2]);
-        }}
-      />
+      <iframe ref={iframeRef} src="http://localhost:3002" onLoad={() => {}} />
     </>
   );
 };
